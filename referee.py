@@ -104,7 +104,6 @@ def _load_player(modulename, package='.'):
     :return: the Player class (a class object)
     """
     package = package
-
     module = importlib.import_module(modulename, package=package)
     player_class = module.Player
     return player_class

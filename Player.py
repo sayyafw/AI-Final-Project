@@ -20,7 +20,7 @@ class Player:
             self.enemy = 'O'
             self.piece_list = self.board.black_pieces
             self.enemy_list = self.board.white_pieces
-        self.minimax = Minimax.alphabeta_search(self.colour, self.enemy)
+        self.minimax = Minimax.alphabeta_search(self.symbol, self.enemy, self.board)
         self.moving = False
 
 
@@ -42,7 +42,8 @@ class Player:
             return (self.i, self.j)
         else:
             self.board.count += 1
-            return self.minimax.alphabeta_search(self.board)
+            friends = self.minimax.alphabeta_search()
+            return self.minimax.alphabeta_search()
 
 
     def update(self, action):
@@ -54,5 +55,5 @@ class Player:
 
         else:
             piece = self.board.find_piece(action[0])
-            self.minimax.makemove(action, self.board, self.enemy, piece)
+            self.minimax.makemove(action[1], self.board, self.enemy, piece)
             self.board.count += 1
