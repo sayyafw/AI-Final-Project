@@ -80,6 +80,9 @@ class alphabeta_search:
     def eval(self, game, colour):
         return 0.3*self.distance_from_center(game, colour) + 0.7*self.pieces_left(game, colour)
 
+    def eval_placeing(self, game, colour):
+        return 10*self.pieces_lefts(game, colour) + 2*self.distance_from_center
+
 
     def makemove(self, coords, board, colour, piece):
         """
@@ -137,6 +140,22 @@ class alphabeta_search:
         dx, dy = direction
         return (px + dx, py + dy)
 
+    def eliminate_surround(colour, pos):
+        """
+        check the surrounding of a piece, and remove enemies
+        """
+        e_pieces = []
+        for direction in DIRECTIONS:
+            adjacent_square = self.step(pos, direction)
+            opposite_square = self.step(adjacent_square, direction)
+            if opposite_square in board.grid:
+                if board.grid[adjacent_square] in ENEMIES[colour] \
+                        and board.grid[opposite_square] in FRIENDS[colour]:
+                    eliminated_piece = board.find_piece(adjacent_square)
+                    self.eliminate_piece(ENEMIES[colour], adjacent_square, board)
+                    e_pieces.append(eliminated_piece)
+        return e_pieces
+
     @staticmethod
     def eliminate_piece(colour, position, game):
         if colour == WHITE:
@@ -165,11 +184,10 @@ class alphabeta_search:
 
     def pieces_left(self, game, colour):
         if colour == WHITE:
-            piece_list = game.white_pieces
+            return len(game.white_pieces)
         else:
-            piece_list = game.black_pieces
-
-        return len(piece_list)
+            return len(game.black_pieces)
+        
 
 
 

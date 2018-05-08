@@ -55,6 +55,15 @@ class Board:
             if piece.alive and piece.pos == square:
                 return piece
 
+    def isEmpty(self, x, y):
+        """
+        return wheter or not a given co-ord on the Board is empty
+        """
+        if (self.grid[x,y] == BLANK):
+            return True
+        else:
+            return False
+
 
 class Piece:
     """
