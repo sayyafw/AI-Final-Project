@@ -18,68 +18,87 @@ class alphabeta_search:
         self.game = game
         if self.colour == WHITE:
             self.piece_list = self.game.white_pieces
+            self.enemy_list = self.game.black_pieces
         else:
             self.piece_list = self.game.black_pieces
+            self.enemy_list = self.game.white_pieces
 
 
     def alphabeta_search(self):
-        value, best_move, best_piece = self.min_max_max(None, self.game, self.depth, self.piece_list[0])
+        value, best_move, best_piece = self.min_max_max(self.game, self.depth, self.piece_list[0], None)
         return_pos = best_piece.pos
-        print(best_piece.pos)
+        print(best_piece.pos, best_move)
+        if (self.colour == WHITE):
+            print("hello")
         best_piece.makemove(best_move)
         return (return_pos, best_move)
 
 
 
-    def min_max_min(self, state, game, depth, oldpiece):
+    def min_max_min(self, game, depth, oldpiece, oldmove):
 
         if self.cut_off(depth):
-            return self.eval(game, self.colour), state, oldpiece
+            return self.eval(self.colour), oldmove, oldpiece
 
-        beta = 100000
+        beta = 10000
 
+        best_move = None
+        best_piece = None
         for piece in self.piece_list:
+            if not piece.alive:
+                continue
             oldpos = piece.pos
             for move in piece.moves():
                 elim_pieces = piece.makemove(move)
-                value = self.min_max_max(move, game, depth+1, piece)
+                value, we, fun = self.min_max_max(game, depth+1, piece, move)
                 piece.undomove(oldpos, elim_pieces)
 
                 if value < beta:
                     beta = value
                     best_move = move
                     best_piece = piece
-
+                else:
+                    break
         return beta, best_move, best_piece
 
-    def min_max_max(self, state, game, depth, oldpiece):
+    def min_max_max(self, game, depth, oldpiece, oldmove):
+
+
+        alpha = -10000
 
         if self.cut_off(depth):
-            return self.eval(game, self.colour), state, oldpiece
-
-        alpha = -100000
+            return self.eval(self.colour), oldmove, oldpiece
+        best_move = None
+        best_piece = None
         for piece in self.piece_list:
+            if not piece.alive:
+                continue
             oldpos = piece.pos
             for move in piece.moves():
                 elim_pieces = piece.makemove(move)
-                value, we, hello = self.min_max_max(move, game, depth+1, piece)
+                value, we, hello = self.min_max_min(game, depth+1, piece, move)
                 piece.undomove(oldpos, elim_pieces)
 
                 if value > alpha:
                     alpha = value
                     best_move = move
                     best_piece = piece
+                else:
+                    break
 
         return alpha, best_move, best_piece
 
     def cut_off(self, depth):
-        if depth > 2:
+        if depth > 3:
             return True
         return False
 
-    def eval(self, game, colour):
-        return 0.3*self.distance_from_center(game, colour) + 0.7*self.pieces_left(game, colour)
-
+    def eval(self, colour):
+        if colour == self.colour:
+            sign = 1
+        else:
+            sign = -1
+        return sign * self.distance_from_center() + self.pieces_left() - 2*self.enemy_pieces_left() + self.piece_distance()
 
     def makemove(self, coords, board, colour, piece):
         """
@@ -112,7 +131,7 @@ class alphabeta_search:
                 if board.grid[adjacent_square] in ENEMIES[colour] \
                         and board.grid[opposite_square] in FRIENDS[colour]:
                     eliminated_piece = board.find_piece(adjacent_square)
-                    self.eliminate_piece(ENEMIES[colour], adjacent_square, board)
+                    self.eliminate_piece(eliminated_piece)
                     eliminated_pieces.append(eliminated_piece)
 
         # check horizontally and vertically: does the piece itself get
@@ -124,8 +143,9 @@ class alphabeta_search:
                     and back_square in board.grid:
                 if board.grid[front_square] in ENEMIES[colour] \
                         and board.grid[back_square] in ENEMIES[colour]:
-                    self.eliminate_piece(colour, pos, board)
+                    self.eliminate_piece(piece)
                     break
+        return eliminated_pieces
 
     def step(self, position, direction):
         """
@@ -137,153 +157,42 @@ class alphabeta_search:
         dx, dy = direction
         return (px + dx, py + dy)
 
-    @staticmethod
-    def eliminate_piece(colour, position, game):
-        if colour == WHITE:
-            for item in  game.white_pieces:
-                if item == position:
-                    game.white_pieces.remove(item)
-            game.grid[position] = BLANK
+    def eliminate_piece(self, piece):
 
-        else:
-            for item in  game.black_pieces:
-                if item.pos == position:
-                    game.black_pieces.remove(item)
-            game.grid[position] = BLANK
+        piece.alive = False
+        self.game.grid[piece.pos] = BLANK
 
-    def distance_from_center(self, game, colour):
-
-        if colour == WHITE:
-            piece_list = game.white_pieces
-        else:
-            piece_list = game.black_pieces
+    def distance_from_center(self):
 
         distance = 0
-        for piece in piece_list:
+        for piece in self.piece_list:
             distance = fabs(piece.pos[0] - 4 + piece.pos[1] - 4)
         return distance
 
-    def pieces_left(self, game, colour):
-        if colour == WHITE:
-            piece_list = game.white_pieces
-        else:
-            piece_list = game.black_pieces
+    def pieces_left(self):
+        count = 0
+        for piece in self.piece_list:
+            if piece.alive:
+                count += 1
+        return count
 
-        return len(piece_list)
+    def enemy_pieces_left(self):
+        count = 0
+        for piece in self.enemy_list:
+            if piece.alive:
+                count += 1
+        return count
 
+    def piece_distance(self):
+        distance = 0
+        for piece1 in self.piece_list:
+            for piece2 in self.piece_list:
+                if piece1 == piece2:
+                    continue
+                dx = abs(piece1.pos[0] - piece2.pos[0])
+                dy = abs(piece1.pos[1] - piece2.pos[1])
+                distance += dx ** 2 + dy ** 2
+        distance /= len(self.piece_list)
+        score = 1.0 / distance
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-
-    def min_max_min(self, game, alpha, beta, depth):
-
-        if self.colour == WHITE:
-            piece_list = game.white_pieces
-        else:
-            piece_list = game.black_pieces
-
-        for piece in piece_list:
-            oldpos = piece.pos
-            for move in piece.moves():
-                piece.makemove(move)
-                value = self.max_value(game, alpha, beta, depth+1, piece)
-                piece.undomove(oldpos)
-
-            if value < beta:
-                beta = value
-                best_move = move
-                best_piece = piece
-
-            if beta < alpha:
-                break
-        return beta, best_move, best_piece
-
-    def min_max_max(self, game, alpha, beta, depth):
-
-        if self.colour == WHITE:
-            piece_list = game.white_pieces
-        else:
-            piece_list = game.black_pieces
-
-        for piece in piece_list:
-            oldpos = piece.pos
-            for move in piece.moves():
-                piece.makemove(move)
-                value = self.min_max_min(game, alpha, beta, depth+1, piece)
-                piece.undomove(oldpos)
-
-                if value > alpha:
-                    alpha = value
-                    best_move = move
-                    best_piece = piece
-
-                if alpha > beta:
-                    break
-
-        return alpha, best_move, best_piece
-
-    def min_value(self, move, game, alpha, beta, depth, piece):
-
-        if self.cut_off(depth):
-            return self.eval(game, self.colour)
-        beta = self.min_max_min(board, alpha, beta, depth+1)
-
-        if beta < alpha:
-            return alpha
-
-        return beta, best_move
-
-    def max_value(self, game, alpha, beta, depth, piece):
-        if self.cut_off(depth):
-            return self.eval(game, self.colour)
-
-            board = copy.deepcopy(game)
-            piece.makemove(move, board, self.enemy)
-            value = self.min_max_in (game, alpha, beta, depth + 1)
-
-            if value > alpha:
-                return alpha, move, piece
-
-            else:
-                beta = value
-                best_move = move
-        return alpha, best_move
-        
-        """
-
+        return score

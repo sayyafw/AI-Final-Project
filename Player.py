@@ -28,7 +28,7 @@ class Player:
 
         if self.board.count < 24:
             if self.i < 6:
-                self.i+=2
+                self.i += 2
             else:
                 self.i = 0
                 if self.colour == 'white':
@@ -43,7 +43,7 @@ class Player:
         else:
             self.board.count += 1
             friends = self.minimax.alphabeta_search()
-            return self.minimax.alphabeta_search()
+            return friends
 
 
     def update(self, action):
@@ -55,5 +55,6 @@ class Player:
 
         else:
             piece = self.board.find_piece(action[0])
-            self.minimax.makemove(action[1], self.board, self.enemy, piece)
-            self.board.count += 1
+            pieces = self.minimax.makemove(action[1], self.board, self.enemy, piece)
+
+            print("Hello")
