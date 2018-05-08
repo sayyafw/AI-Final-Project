@@ -54,6 +54,7 @@ class Board:
         for piece in self.black_pieces + self.white_pieces:
             if piece.alive and piece.pos == square:
                 return piece
+        return None
 
 
 class Piece:
