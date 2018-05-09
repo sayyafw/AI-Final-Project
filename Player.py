@@ -36,20 +36,7 @@ class Player:
 
         #Placing Phase
         if self.board.count < 24:
-            if self.i < 6:
-                self.i += 2
-            else:
-                self.i = 0
-                if self.colour == 'white':
-                    self.j += 1
-                else:
-                    self.j -= 1
-
-            piece = Piece(self.symbol, (self.i, self.j), self.board)
-            self.piece_list.append(piece)
-            piece.makemove((self.i, self.j))
-            self.board.count += 1
-            return (self.i, self.j)
+            return placeing_phase
         #Moving Phase
         else:
             #Checks if board needs to be shrunk
@@ -133,7 +120,7 @@ class Player:
         history.append(eliminated_piece)
 
 
-    def placeing_phase():
+    def placeing_phase(self):
         """
         begin a simulation for placing phase, record the best step yet
         """
@@ -258,7 +245,7 @@ class Player:
         if len(history) > 0:
             #if it was a piece was placed
             if history[-1][0] == "Placing":
-                eliminate(history[-1][2])
+                self.minimax.delete_piece((self.board(history[-1][2])))
                 del history[-1]
                 return True
             #if a piece was eliminated, put it back

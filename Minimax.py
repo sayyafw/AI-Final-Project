@@ -233,6 +233,12 @@ class alphabeta_search:
         self.game.grid[piece.pos] = BLANK
 
 
+    def delete_piece(self, piece):
+        if piece in self.piece_list:
+            self.piece_list.remove(piece)
+        else if piece in self.enemy_list:
+            self.enemy_list.remove(piece)
+
     """
     Evaluates the distance from center of the entire set
     """
