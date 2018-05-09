@@ -128,7 +128,8 @@ class alphabeta_search:
         calculate the difference between number of living pieces,
         reward slightly for being away from the center
         """
-        return 5*(self.pieces_left() - self.enemy_pieces_left) + 2*self.distance_from_center()
+        dist = self.distance_from_center()
+        return 5*(self.pieces_left() - self.enemy_pieces_left()) + 2*dist
 
 
     def makemove(self, newpos, board, colour, piece):
@@ -233,11 +234,12 @@ class alphabeta_search:
         self.game.grid[piece.pos] = BLANK
 
 
-    def delete_piece(self, piece):
-        if piece in self.piece_list:
-            self.piece_list.remove(piece)
-        else if piece in self.enemy_list:
-            self.enemy_list.remove(piece)
+    def delete_piece(self, x, y):
+        for piece in self.piece_list:
+            if (piece.pos == (x,y)):
+                self.piece_list.remove(piece)
+                break
+
 
     """
     Evaluates the distance from center of the entire set
