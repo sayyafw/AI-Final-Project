@@ -123,6 +123,14 @@ class alphabeta_search:
             sign = -1
         return sign * (self.pieces_left() - 5*self.enemy_pieces_left()**2 + self.piece_distance())
 
+    def eval_placeing(self, colour):
+        """
+        calculate the difference between number of living pieces,
+        reward slightly for being away from the center
+        """
+        return 5*(self.pieces_left() - self.enemy_pieces_left) + 2*self.distance_from_center()
+
+
     def makemove(self, newpos, board, colour, piece):
         """
         Carry out a move from a given pieces position to the position
@@ -167,6 +175,42 @@ class alphabeta_search:
                 if board.grid[front_square] in ENEMIES[colour] \
                         and board.grid[back_square] in ENEMIES[colour]:
                     self.eliminate_piece(piece)
+                    break
+        return eliminated_pieces
+
+    def check_surround(self, pos,colour):
+        # eliminate any newly surrounded pieces
+        eliminated_pieces = []
+
+        if colour == "white":
+            symbol = "W"
+            enemy = "B"
+        else:
+            symbol = "B"
+            enemy = "W"
+
+        # check adjacent squares: did this move elimminate anyone?
+        for direction in DIRECTIONS:
+            adjacent_square = self.step(pos, direction)
+            opposite_square = self.step(adjacent_square, direction)
+            if opposite_square in board.grid:
+                if board.grid[adjacent_square] in ENEMIES[colour] \
+                        and board.grid[opposite_square] in FRIENDS[colour]:
+                    eliminated_piece = board.find_piece(adjacent_square)
+                    self.eliminate_piece(eliminated_piece)
+                    eliminated_pieces.append(("Eliminated", enemy, adjacent_square))
+
+        # check horizontally and vertically: does the piece itself get
+        # eliminated?
+        for forward, backward in [(UP, DOWN), (LEFT, RIGHT)]:
+            front_square = self.step(pos, forward)
+            back_square = self.step(pos, backward)
+            if front_square in board.grid \
+                    and back_square in board.grid:
+                if board.grid[front_square] in ENEMIES[colour] \
+                        and board.grid[back_square] in ENEMIES[colour]:
+                    self.eliminate_piece(piece)
+                    eliminated_pieces.append(("Eliminated", symbol, pos))
                     break
         return eliminated_pieces
 
