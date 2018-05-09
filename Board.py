@@ -1,5 +1,5 @@
 # HELPERS
-
+import Minimax
 WHITE, BLACK, CORNER, BLANK, REMOVED = ['O', '@', 'X', '-', ' ']
 ENEMIES = {WHITE: {BLACK, CORNER}, BLACK: {WHITE, CORNER}}
 FRIENDS = {WHITE: {WHITE, CORNER}, BLACK: {BLACK, CORNER}}
@@ -169,6 +169,8 @@ class Piece:
                     break
 
         return eliminated_pieces
+
+    
 
     def undomove(self, oldpos, eliminated_pieces):
         """

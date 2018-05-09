@@ -288,4 +288,4 @@ class alphabeta_search:
         score = 1.0 / distance
         return distance
 
-
+    
