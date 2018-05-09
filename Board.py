@@ -199,3 +199,11 @@ class Piece:
         self.alive = True
         self.board.grid[self.pos] = self.player
 
+    def isEmpty(self, x, y):
+        """
+        return wheter or not a given co-ord on the Board is empty
+        """
+        if (self.grid[x,y] == BLANK):
+            return True
+        else:
+            return False

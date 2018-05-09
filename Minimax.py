@@ -235,3 +235,5 @@ class alphabeta_search:
         distance /= len(self.piece_list)
         score = 1.0 / distance
         return distance
+
+

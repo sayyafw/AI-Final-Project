@@ -9,6 +9,7 @@ class Player:
         self.board = Board()
         self.i = 0
         self.j = 0
+        self.history = []
         if colour == 'white':
             self.symbol = 'O'
             self.piece_list = self.board.white_pieces
@@ -118,3 +119,104 @@ class Player:
         if len(list) == 0:
             return False
         return True
+#############################################################
+
+    def place(self, i , j, symbol):
+        """
+        place a piece on the board
+        """
+        piece = Piece(self.symbol, (self.i, self.j), self.board)
+        self.piece_list.append(piece)
+        piece.makemove((self.i, self.j))
+
+    def placeing_phase():
+        """
+        begin a simulation for placing phase, record the best step yet
+        """
+        turn = self.board.count
+        a = 1000
+        b = -1000
+        depth = 0
+        value = -10000
+        best_move = []
+        if colour == white:
+            self.ystart = 0
+            self.yend = 5
+        else:
+            self.ystart = 2
+            self.yend = 7
+
+        value = max(0, 0, a, b)
+        
+        return
+
+    def max(self, turn, depth, a, b):
+        turn += 1
+        depth += 1
+        if (depth == 2 or turn >=24):
+            return self.minimax.eval_placeing(self.board, colour)
+        for x in range(7):
+            for y in range(ystart, yend):
+                #if the board position is available, try it out
+                if not self.board.isEmpty(x,y):
+                    place(x, y, 'O')
+                    history.append(("Placing", "W", (x,y)))
+                    new_value = min()
+                    if new_value > value:
+                        value = new_value
+                    if new_value >= b:
+                        undo_history()
+                        return value
+                    if new_value > a:
+                        a = new_value
+        undo_history()
+        return value
+
+    def min(self, turn, depth, a, b):
+        turn += 1
+        depth += 1
+        value = 10000
+        if (depth == 2 or turn >=24):
+            return self.minimax.eval_placeing(self.board, colour)
+        for x in range(7):
+            for y in range(ystart, yend):
+                #if the board position is available, try it out
+                if not self.board.isEmpty(x,y):
+                    place(x, y, 'O')
+                    history.append(("Placing", "W", (x,y)))
+                    new_value = max()
+                    if new_value < value:
+                        value = new_value
+                    if new_value <= a:
+                        undo_history()
+                        return value
+                    if new_value < b:
+                        b = new_value
+        undo_history()
+        return value
+
+    def undo_history(self):
+    """
+    undo the lastest step performed
+    """
+        if len(history) > 0:
+            if history[-1][0] == "Placing":
+                eliminate(history[-1][2])
+                del history[-1]
+                return True
+
+            else if history[-1][0] == "Eliminated":
+                if history[-1][1] == "B":
+                    #place black at history [-1][2]
+                    del history[-1]
+                    undo_history()
+                    return True
+                else:
+                    #place white
+                    del history[-1]
+                    undo_history()
+                    return True
+            else:
+                return False
+        else:
+            return False
