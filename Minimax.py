@@ -90,28 +90,31 @@ class alphabeta_search:
         for piece in self.piece_list:
             if not piece.alive:
                 continue
-            oldpos = piece.pos
-            for move in piece.moves():
-                elim_pieces = piece.makemove(move)
-                value = self.min_max_min(game, depth+1)
-                piece.undomove(oldpos, elim_pieces)
+            else:
+                oldpos = piece.pos
+                for move in piece.moves():
+                    elim_pieces = piece.makemove(move)
+                    value = self.min_max_min(game, depth+1)
+                    piece.undomove(oldpos, elim_pieces)
 
-                #Checks if best possible move
-                if value[0] > alpha:
-                    alpha = value[0]
-                    best_move = move
-                    best_piece = piece
-                else:
-                    break
+                    #Checks if best possible move
+                    if value[0] > alpha:
+                        alpha = value[0]
+                        best_move = move
+                        best_piece = piece
+                    else:
+                        break
         return alpha, best_move, best_piece
 
     """
     Checks if max allowable depth reached
     """
     def cut_off(self, depth):
+
         if depth > 2:
             return True
         return False
+
 
     """
     Using different heuristic functions, attempts to place a value on a game state that is incomplete
@@ -121,9 +124,23 @@ class alphabeta_search:
             sign = 1
         else:
             sign = -1
-        return sign * (self.pieces_left() - 5*self.enemy_pieces_left()**2 + self.piece_distance())
 
-    def makemove(self, newpos, board, colour, piece):
+        return sign * (10*self.pieces_left() - 10*self.enemy_pieces_left() + 15*self.piece_distance() - 10*self.distance_from_center())
+
+    def eval_placeing(self, colour):
+        """
+        calculate the difference between number of living pieces,
+        reward slightly for being away from the center
+        """
+
+        if colour == self.colour:
+            sign = 1
+        else:
+            sign = -1
+        dist = self.distance_from_center()
+        return sign * 5*(self.pieces_left() - self.enemy_pieces_left()) + 2 * dist
+
+    def makemove(self, newpos, colour, piece):
         """
         Carry out a move from a given pieces position to the position
         `newpos` (a position from the list returned from the `moves()` method)
@@ -136,6 +153,7 @@ class alphabeta_search:
         Do not call with method on pieces with `alive = False`.
         """
         # make the move
+        board = self.game
         oldpos = piece.pos
         pos = newpos
         piece.oldpos = piece.pos
@@ -165,7 +183,8 @@ class alphabeta_search:
             if front_square in board.grid \
                     and back_square in board.grid:
                 if board.grid[front_square] in ENEMIES[colour] \
-                        and board.grid[back_square] in ENEMIES[colour]:
+                        and board.grid[back_square] in ENEMIES[colour]\
+                        and not colour == CORNER:
                     self.eliminate_piece(piece)
                     break
         return eliminated_pieces
@@ -234,4 +253,10 @@ class alphabeta_search:
                 distance += dx ** 2 + dy ** 2
         distance /= len(self.piece_list)
         score = 1.0 / distance
-        return distance
+        return score
+
+    def delete_piece(self, x, y):
+        for piece in self.piece_list:
+            if (piece.pos == (x, y)):
+                self.piece_list.remove(piece)
+                break

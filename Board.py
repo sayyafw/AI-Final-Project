@@ -1,7 +1,7 @@
 # HELPERS
 
 WHITE, BLACK, CORNER, BLANK, REMOVED = ['O', '@', 'X', '-', ' ']
-ENEMIES = {WHITE: {BLACK, CORNER}, BLACK: {WHITE, CORNER}}
+ENEMIES = {WHITE: {BLACK, CORNER}, BLACK: {WHITE, CORNER}, CORNER: {WHITE, BLACK}}
 FRIENDS = {WHITE: {WHITE, CORNER}, BLACK: {BLACK, CORNER}}
 
 DIRECTIONS = UP, DOWN, LEFT, RIGHT = (0, -1), (0, 1), (-1, 0), (1, 0)
@@ -55,6 +55,17 @@ class Board:
             if piece.alive and piece.pos == square:
                 return piece
         return None
+
+    def isEmpty(self, x, y):
+        """
+        return whether or not a given co-ord on the Board is empty
+        """
+        if (self.grid[x, y] == BLANK):
+            return True
+        else:
+            return False
+
+
 
 
 class Piece:
@@ -199,3 +210,39 @@ class Piece:
         self.alive = True
         self.board.grid[self.pos] = self.player
 
+    def corner_move(self, newpos, colour, piece):
+        """
+        Carry out a move from a given pieces position to the position
+        `newpos` (a position from the list returned from the `moves()` method)
+        Update the board including eliminating any nearby pieces surrounded as
+        a result of this move.
+
+        Return a list of pieces eliminated by this move (to be passed back to
+        the `undomove()` method if you want to reverse this move).
+
+        Do not call with method on pieces with `alive = False`.
+        """
+        # make the move
+        board = self.board
+        oldpos = piece.pos
+        pos = newpos
+        piece.oldpos = piece.pos
+        piece.pos = pos
+        board.grid[oldpos] = BLANK
+        board.grid[pos] = colour
+
+        # eliminate any newly surrounded pieces
+        eliminated_pieces = []
+
+        # check adjacent squares: did this move elimminate anyone?
+        for direction in DIRECTIONS:
+            adjacent_square = step(pos, direction)
+            opposite_square = step(adjacent_square, direction)
+            piece1 = board.find_piece(adjacent_square)
+            if opposite_square in board.grid:
+                if board.grid[adjacent_square] in ENEMIES[CORNER] \
+                        and board.grid[opposite_square] in ENEMIES[piece1.player]:
+                    piece1.eliminate()
+                    eliminated_pieces.append(piece1)
+
+        return eliminated_pieces
