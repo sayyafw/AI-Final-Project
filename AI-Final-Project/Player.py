@@ -9,8 +9,6 @@ class Player:
         self.board = Board()
         self.i = 0
         self.j = 0
-        self.history = []
-        self.best = ()
         if colour == 'white':
             self.symbol = 'O'
             self.piece_list = self.board.white_pieces
@@ -23,7 +21,7 @@ class Player:
             self.piece_list = self.board.black_pieces
             self.enemy_list = self.board.white_pieces
         self.minimax = Minimax.alphabeta_search(self.symbol, self.enemy, self.board)
-        self.placing = Placing.Placing(self.colour)
+        self.placing = Placing.Placing(self.colour, self.board)
         #Variables used to judge map shrink
         self.shorten1 = 127
         self.shorten2 = 128
@@ -37,6 +35,7 @@ class Player:
         #Placing Phase
         if self.board.count < 24:
             self.board.count += 1
+            print("not in place" + str(self.board.white_pieces) + "||||||||||||" + str(self.board.black_pieces))
             v = self.placing.placeing_phase()
             self.board.grid[v[0], v[1]] = self.symbol
             piece = Piece(self.symbol, v, self.board)
@@ -46,9 +45,7 @@ class Player:
                 print(str(eliminated_piece))
                 for item in eliminated_piece:
                     self.minimax.delete_piece(item.pos[0],item.pos[1])
-
-            print("my colour is: "+str(self.colour)+" "+str(self.enemy_list))
-            print("my colour is: "+str(self.colour)+" "+str(self.piece_list))
+            #print("aaaaaa" + str(self.piece_list) + "||||||||||||" + str(self.enemy_list))
             return v
         #Moving Phase
         else:
@@ -71,11 +68,13 @@ class Player:
         self.board.count += 1
         #Placing phase action
         if self.board.count < 25:
+
+
+            self.board.grid[action[0], action[1]] = self.enemy
             piece = Piece(self.enemy, action, self.board)
             self.enemy_list.append(piece)
             eliminated_piece = piece.makemove(action)
             if len(eliminated_piece):
-                print(str(eliminated_piece))
                 for item in eliminated_piece:
                     self.minimax.delete_piece(item.pos[0],item.pos[1])
 

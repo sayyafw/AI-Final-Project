@@ -3,9 +3,9 @@ import Minimax
 from Board import Piece
 
 class Placing:
-    def __init__(self, colour):
+    def __init__(self, colour, board):
         self.colour = colour
-        self.board = Board()
+        self.board = board
         self.history = []
         self.best = ()
         if colour == 'white':
@@ -27,7 +27,10 @@ class Placing:
         """
         #create a pice at location i, j on board.
         piece = Piece(symbol, (i, j), self.board)
-        self.piece_list.append(piece)
+        if symbol == self.symbol:
+            self.piece_list.append(piece)
+        else:
+            self.enemy_list.append(piece)
         #get the pieces that would be eliminated if you place here
         eliminated_piece = piece.makemove((i, j))
         #if there are any pieces removed, add it to the record
@@ -44,6 +47,7 @@ class Placing:
         """
         begin a simulation for placing phase, record the best step yet
         """
+        print("in place" + str(self.board.white_pieces) + "||||||||||||" + str(self.board.black_pieces))
         turn = self.board.count
         a = -1000
         b = 1000
@@ -60,7 +64,9 @@ class Placing:
 
     def max(self, turn, depth, a, b):
         #check end condition
+        #print("at max: " + str(self.board.white_pieces) + "||||||||||||" + str(self.board.black_pieces) + "depth: "+str(depth))
         if (depth >= 3):
+            
             return self.minimax.eval_placeing(self.colour)
         #check for colour, assign variables
         colour = self.colour
@@ -112,8 +118,9 @@ class Placing:
     def min(self, turn, depth, a, b):
 
         value = 10000
-
+        #print("at min: " + str(self.piece_list) + "||||||||||||" + str(self.enemy_list) + "depth: "+str(depth))
         if (depth >= 3):
+            
             return self.minimax.eval_placeing(self.colour)
         colour = self.colour
         if colour == "white":
@@ -164,7 +171,7 @@ class Placing:
                 cord = self.history[-1][2] 
                 self.minimax.delete_piece(cord[0], cord[1])
                 self.board.grid[cord[0], cord[1]] = '-' 
-                del self.history[-1]
+                del self.history[-1]    
                 return
             #if a piece was eliminated, put it back
             elif self.history[-1][0] == "Eliminated":
